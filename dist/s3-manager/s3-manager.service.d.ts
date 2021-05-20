@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import { S3 } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
+import { S3 } from 'aws-sdk';
 export declare class S3ManagerService {
     private readonly s3;
     private readonly configService;

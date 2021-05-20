@@ -1,9 +1,9 @@
 /// <reference types="multer" />
 /// <reference types="node" />
-import { S3ManagerService } from 'src/s3-manager/s3-manager.service';
+import { S3ManagerService } from '../s3-manager/s3-manager.service';
 import { File, FileWithUrl } from './schemas/file.schema';
 import { FilesRepository } from './files.repository';
-import { FunctionResult } from 'src/utils/functionResult';
+import { FunctionResult } from '../utils/functionResult';
 export declare class FilesService {
     private readonly filesRepository;
     private readonly s3Manager;

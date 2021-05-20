@@ -14,10 +14,9 @@ import {
   UseInterceptors,
   HttpException,
 } from '@nestjs/common';
-import { FilesService } from './files.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { FilesService } from './files.service';
 import { Response } from 'express';
-import { Schema as MongooseSchema } from 'mongoose';
 import { File } from './schemas/file.schema';
 import { FunctionResult } from '../utils/functionResult';
 
@@ -28,7 +27,7 @@ export class FilesController {
   @Post()
   @UseInterceptors(FilesInterceptor('files', 10))
   async upload(
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFiles() files: Express.Multer.File[],
   ): Promise<FunctionResult<File>[]> {
     return this.filesService.uploadFiles(files);
   }

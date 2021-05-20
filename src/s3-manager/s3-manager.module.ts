@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AwsSdkModule } from 'nest-aws-sdk';
 import { S3 } from 'aws-sdk';
-import { ConfigModule } from '@nestjs/config';
 import { S3ManagerService } from './s3-manager.service';
 
 @Module({

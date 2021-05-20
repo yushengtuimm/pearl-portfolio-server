@@ -8,9 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.S3ManagerModule = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const nest_aws_sdk_1 = require("nest-aws-sdk");
 const aws_sdk_1 = require("aws-sdk");
-const config_1 = require("@nestjs/config");
 const s3_manager_service_1 = require("./s3-manager.service");
 let S3ManagerModule = class S3ManagerModule {
 };

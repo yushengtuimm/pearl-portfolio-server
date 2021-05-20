@@ -6,11 +6,10 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { S3ManagerService } from 'src/s3-manager/s3-manager.service';
+import { S3ManagerService } from '../s3-manager/s3-manager.service';
 import { File, FileWithUrl } from './schemas/file.schema';
 import { FilesRepository } from './files.repository';
-import { Schema as MongooseSchema } from 'mongoose';
-import { FunctionResult } from 'src/utils/functionResult';
+import { FunctionResult } from '../utils/functionResult';
 
 @Injectable()
 export class FilesService {
@@ -28,12 +27,12 @@ export class FilesService {
         const filename = file.originalname;
         const exist = await this.filesRepository.exist({ filename: filename });
         if (exist) {
-          return new FunctionResult<File>({
+          return {
             success: false,
             details: new ConflictException(
               `file with name [${filename}] already uploaded to the cloud storage.`,
             ).getResponse(),
-          });
+          };
         }
         const extention = filename.split('.').pop();
         const uploadResult = await this.s3Manager.uploadFileToBucket(buffer);
@@ -44,10 +43,10 @@ export class FilesService {
           file_type: extention,
         });
 
-        return new FunctionResult<File>({
+        return {
           success: true,
           result_object: fileInfo,
-        });
+        };
       }),
     );
   }
@@ -59,13 +58,12 @@ export class FilesService {
     return Promise.all(
       fileInfos.map(async (file) => {
         const url = await this.s3Manager.generatePresignedUrl(file.fileId);
-        const result: FileWithUrl = {
+        return {
           fileId: file.fileId,
           file_type: file.file_type,
           filename: file.filename,
           url: url,
         };
-        return result;
       }),
     );
   }

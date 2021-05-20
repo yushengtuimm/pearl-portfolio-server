@@ -14,9 +14,9 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.S3ManagerService = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const aws_sdk_1 = require("aws-sdk");
 const nest_aws_sdk_1 = require("nest-aws-sdk");
-const config_1 = require("@nestjs/config");
 const uuid_1 = require("uuid");
 let S3ManagerService = class S3ManagerService {
     constructor(s3, configService) {

@@ -24,8 +24,8 @@ export class FilesRepository {
   }
 
   async create(file: File): Promise<File> {
-    const newFile = new this.fileModel(file);
-    return newFile.save();
+    const newFile = file;
+    return this.fileModel.create(newFile);
   }
 
   async findOneAndUpdate(

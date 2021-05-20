@@ -8,11 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FilesModule = void 0;
 const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
+const mongoose_1 = require("@nestjs/mongoose");
 const files_service_1 = require("./files.service");
 const files_controller_1 = require("./files.controller");
 const s3_manager_module_1 = require("../s3-manager/s3-manager.module");
-const mongoose_1 = require("@nestjs/mongoose");
 const file_schema_1 = require("./schemas/file.schema");
 const files_repository_1 = require("./files.repository");
 let FilesModule = class FilesModule {
@@ -22,7 +21,6 @@ FilesModule = __decorate([
         imports: [
             mongoose_1.MongooseModule.forFeature([{ name: file_schema_1.File.name, schema: file_schema_1.FileSchema }]),
             s3_manager_module_1.S3ManagerModule,
-            config_1.ConfigModule,
         ],
         controllers: [files_controller_1.FilesController],
         providers: [files_service_1.FilesService, files_repository_1.FilesRepository],
