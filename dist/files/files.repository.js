@@ -35,8 +35,8 @@ let FilesRepository = class FilesRepository {
         return this.fileModel.find(fileFilterQuery);
     }
     async create(file) {
-        const newFile = new this.fileModel(file);
-        return newFile.save();
+        const newFile = file;
+        return this.fileModel.create(newFile);
     }
     async findOneAndUpdate(fileFilterQuery, file) {
         return this.fileModel.findOneAndUpdate(fileFilterQuery, file);

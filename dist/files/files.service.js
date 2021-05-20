@@ -13,7 +13,6 @@ exports.FilesService = void 0;
 const common_1 = require("@nestjs/common");
 const s3_manager_service_1 = require("../s3-manager/s3-manager.service");
 const files_repository_1 = require("./files.repository");
-const functionResult_1 = require("../utils/functionResult");
 let FilesService = class FilesService {
     constructor(filesRepository, s3Manager) {
         this.filesRepository = filesRepository;
@@ -25,10 +24,10 @@ let FilesService = class FilesService {
             const filename = file.originalname;
             const exist = await this.filesRepository.exist({ filename: filename });
             if (exist) {
-                return new functionResult_1.FunctionResult({
+                return {
                     success: false,
                     details: new common_1.ConflictException(`file with name [${filename}] already uploaded to the cloud storage.`).getResponse(),
-                });
+                };
             }
             const extention = filename.split('.').pop();
             const uploadResult = await this.s3Manager.uploadFileToBucket(buffer);
@@ -37,10 +36,10 @@ let FilesService = class FilesService {
                 filename: filename,
                 file_type: extention,
             });
-            return new functionResult_1.FunctionResult({
+            return {
                 success: true,
                 result_object: fileInfo,
-            });
+            };
         }));
     }
     async findAllWithType(fileType) {
@@ -49,13 +48,12 @@ let FilesService = class FilesService {
         });
         return Promise.all(fileInfos.map(async (file) => {
             const url = await this.s3Manager.generatePresignedUrl(file.fileId);
-            const result = {
+            return {
                 fileId: file.fileId,
                 file_type: file.file_type,
                 filename: file.filename,
                 url: url,
             };
-            return result;
         }));
     }
     async findOne(fileId) {

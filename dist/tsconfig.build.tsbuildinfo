@@ -3212,17 +3212,17 @@
         "affectsGlobalScope": false
       },
       "../src/files/files.repository.ts": {
-        "version": "1c469aeb945539cbcb9c3f23850f1a72498210beee63554b11ba07a4fd6794e8",
+        "version": "078cf8fe6b2fa165809bd0106b7000bc9dc7a42cbcf689883c59963af059d9f7",
         "signature": "969a14ae403921224322c29174f0e333f10ec31b3a7800420cb944b82ed51388",
         "affectsGlobalScope": false
       },
       "../src/utils/functionresult.ts": {
-        "version": "34f081ac627bf002be24a4e7849d34c478a7eb644e618eee93228176da15e036",
-        "signature": "16ba6d1fcf0aa2c0e84b52edb8e186135800a1336b6d6c53a6705c66041f5777",
+        "version": "3f824afbbb4c2865db5e4933c87b409a40eec60cef67c47c1fc62d47ba0318b8",
+        "signature": "c7e38efc47f531d23c9ee9b56a380c5d37f4c1fd2ee2d800ab16e6841442db05",
         "affectsGlobalScope": false
       },
       "../src/files/files.service.ts": {
-        "version": "1e22e3b392264c6b8b127480495005f788b63564210cf023fb419a346518548a",
+        "version": "c26254cc7e33649996c8774791ab6e0a9f94c40b890fab38fa3f7cec9118cab1",
         "signature": "bf0d7ae345ccf7db1262142ba17d85e1d3062d2180949bcd0a999a13cba03843",
         "affectsGlobalScope": false
       },
@@ -3362,7 +3362,7 @@
         "affectsGlobalScope": false
       },
       "../src/files/files.module.ts": {
-        "version": "c8e93ecea82cffa08f8524cdca79e4cf89fe0939825a15d4e343f63177103bb1",
+        "version": "608544ccdca538bbd52bdd2a255b5c5936441b35903124e4867da27c59ca530a",
         "signature": "3a86ac7f72f5e69f56d0ce8eda8ea581bb2301e2bea6c1f277f2935253089181",
         "affectsGlobalScope": false
       },
@@ -3547,13 +3547,13 @@
         "affectsGlobalScope": false
       },
       "../src/main.ts": {
-        "version": "ab9d5323c86dd5b863e5506c33f7bfd15f32142e27942b4a15f61a363dfbfe72",
+        "version": "317afd4fcc288e1c3d98d7981522900a878e541a9321d828705ef70d10a6c531",
         "signature": "f761c91419d0a89422a0004ef1a92929dd4d2d5e5c16758654d8b0467d1998c6",
         "affectsGlobalScope": false
       },
       "../src/files/mocks/data.ts": {
-        "version": "7f06e30233adc85b351d6b2cb636a18b52d035322bdbf1fd7cad0e7a1979ea50",
-        "signature": "450126641a6f0693d3e0e4ec0bc44bda769d672127f02ed7f6f48359cb685455",
+        "version": "9f52666f533783d2f0c2f2a7fa9cbfdb91bde18f6aa2b0f893dc9c9932d84ffc",
+        "signature": "4047c6e9eb9e7d5a6c266d6a5810a8e1a7638396ddd3e38986a9fa01a23a301e",
         "affectsGlobalScope": false
       },
       "../src/utils/mocks/genereatemockfiles.ts": {
@@ -7542,7 +7542,6 @@
       ],
       "../src/files/files.module.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
-        "../node_modules/@nestjs/config/index.d.ts",
         "../node_modules/@nestjs/mongoose/index.d.ts",
         "../src/files/files.controller.ts",
         "../src/files/files.repository.ts",
@@ -7565,7 +7564,8 @@
       ],
       "../src/files/mocks/data.ts": [
         "../node_modules/@types/node/stream.d.ts",
-        "../src/files/schemas/file.schema.ts"
+        "../src/files/schemas/file.schema.ts",
+        "../src/utils/functionresult.ts"
       ],
       "../src/files/schemas/file.schema.ts": [
         "../node_modules/@nestjs/mongoose/index.d.ts",
@@ -11392,18 +11392,7 @@
         "../node_modules/@nestjs/common/index.d.ts"
       ]
     },
-    "semanticDiagnosticsPerFile": [
-      "../src/app.controller.ts",
-      "../src/app.module.ts",
-      "../src/app.service.ts",
-      "../src/files/files.repository.ts",
-      "../src/files/files.service.ts",
-      "../src/files/schemas/file.schema.ts",
-      "../src/main.ts",
-      "../src/s3-manager/s3-manager.module.ts",
-      "../src/s3-manager/s3-manager.service.ts",
-      "../src/utils/functionresult.ts"
-    ]
+    "semanticDiagnosticsPerFile": []
   },
   "version": "4.2.4"
 }
