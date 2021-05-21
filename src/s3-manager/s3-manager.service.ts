@@ -42,7 +42,7 @@ export class S3ManagerService {
         Bucket: this.configService.get('AWS_BUCKET_NAME'),
         Body: dataBuffer,
         Key: `${uuid() + '.' + file_ext}`,
-        ContentType: 'pdf',
+        ContentType: file_ext === 'pdf' ? 'application/pdf' : null,
       })
       .promise();
   }

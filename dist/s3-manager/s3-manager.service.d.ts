@@ -10,5 +10,5 @@ export declare class S3ManagerService {
         stream: import("stream").Readable;
     }>;
     generatePresignedUrl(key: string): Promise<string>;
-    uploadFileToBucket(dataBuffer: Buffer): Promise<S3.ManagedUpload.SendData>;
+    uploadFileToBucket(dataBuffer: Buffer, file_ext: string): Promise<S3.ManagedUpload.SendData>;
 }

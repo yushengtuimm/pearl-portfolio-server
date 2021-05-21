@@ -1,4 +1,12 @@
+exports.id = 0;
+exports.ids = null;
+exports.modules = {
+
+/***/ 14:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
 "use strict";
+
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,13 +19,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.S3ManagerService = void 0;
-const common_1 = require("@nestjs/common");
-const config_1 = require("@nestjs/config");
-const aws_sdk_1 = require("aws-sdk");
-const nest_aws_sdk_1 = require("nest-aws-sdk");
-const uuid_1 = require("uuid");
+const common_1 = __webpack_require__(5);
+const config_1 = __webpack_require__(10);
+const aws_sdk_1 = __webpack_require__(15);
+const nest_aws_sdk_1 = __webpack_require__(7);
+const uuid_1 = __webpack_require__(16);
 let S3ManagerService = class S3ManagerService {
     constructor(s3, configService) {
         this.s3 = s3;
@@ -48,7 +57,7 @@ let S3ManagerService = class S3ManagerService {
             Bucket: this.configService.get('AWS_BUCKET_NAME'),
             Body: dataBuffer,
             Key: `${uuid_1.v4() + '.' + file_ext}`,
-            ContentType: 'pdf',
+            ContentType: 'application/pdf',
         })
             .promise();
     }
@@ -56,8 +65,22 @@ let S3ManagerService = class S3ManagerService {
 S3ManagerService = __decorate([
     common_1.Injectable(),
     __param(0, nest_aws_sdk_1.InjectAwsService(aws_sdk_1.S3)),
-    __metadata("design:paramtypes", [aws_sdk_1.S3,
-        config_1.ConfigService])
+    __metadata("design:paramtypes", [typeof (_a = typeof aws_sdk_1.S3 !== "undefined" && aws_sdk_1.S3) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
 ], S3ManagerService);
 exports.S3ManagerService = S3ManagerService;
-//# sourceMappingURL=s3-manager.service.js.map
+
+
+/***/ })
+
+};
+exports.runtime =
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ "use strict";
+/******/ 
+/******/ /* webpack/runtime/getFullHash */
+/******/ (() => {
+/******/ 	__webpack_require__.h = () => ("bc63471a1fa1b7aded27")
+/******/ })();
+/******/ 
+/******/ }
+;
