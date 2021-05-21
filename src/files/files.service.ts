@@ -36,8 +36,12 @@ export class FilesService {
             ).getResponse(),
           };
         }
+
         const extention = filename.split('.').pop();
-        const uploadResult = await this.s3Manager.uploadFileToBucket(buffer);
+        const uploadResult = await this.s3Manager.uploadFileToBucket(
+          buffer,
+          extention,
+        );
 
         const fileInfo = await this.filesRepository.create({
           fileId: uploadResult.Key,

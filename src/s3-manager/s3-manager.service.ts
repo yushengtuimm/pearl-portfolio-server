@@ -35,12 +35,14 @@ export class S3ManagerService {
 
   async uploadFileToBucket(
     dataBuffer: Buffer,
+    file_ext: string,
   ): Promise<S3.ManagedUpload.SendData> {
     return this.s3
       .upload({
         Bucket: this.configService.get('AWS_BUCKET_NAME'),
         Body: dataBuffer,
-        Key: `${uuid()}`,
+        Key: `${uuid() + '.' + file_ext}`,
+        ContentType: 'pdf',
       })
       .promise();
   }
