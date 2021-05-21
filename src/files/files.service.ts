@@ -7,9 +7,11 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { S3ManagerService } from '../s3-manager/s3-manager.service';
-import { File, FileWithUrl } from './schemas/file.schema';
+import { File } from './schemas/file.schema';
 import { FilesRepository } from './files.repository';
 import { FunctionResult } from '../utils/functionResult';
+import { FileWithUrlDto } from './dto/fileWithUrl.dto';
+import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class FilesService {
@@ -51,10 +53,8 @@ export class FilesService {
     );
   }
 
-  async findAllWithType(fileType: string): Promise<FileWithUrl[]> {
-    const fileInfos = await this.filesRepository.find({
-      file_type: fileType,
-    });
+  async findAll(filterQuery: FilterQuery<File>): Promise<FileWithUrlDto[]> {
+    const fileInfos = await this.filesRepository.find(filterQuery);
     return Promise.all(
       fileInfos.map(async (file) => {
         const url = await this.s3Manager.generatePresignedUrl(file.fileId);
@@ -62,6 +62,7 @@ export class FilesService {
           fileId: file.fileId,
           file_type: file.file_type,
           filename: file.filename,
+          updated: file.updated,
           url: url,
         };
       }),

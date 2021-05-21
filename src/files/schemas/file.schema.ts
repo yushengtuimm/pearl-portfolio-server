@@ -4,12 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 export type FileDocument = File & Document;
 
-type BaseUrl = {
-  url: string;
-};
-
-export type FileWithUrl = File & BaseUrl;
-
 @Schema()
 export class File {
   @Prop({ type: String, required: true, default: uuidv4() })

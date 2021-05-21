@@ -16,9 +16,10 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { File } from './schemas/file.schema';
 import { FunctionResult } from '../utils/functionResult';
+import { FilterQuery } from 'mongoose';
 
 @Controller('files')
 export class FilesController {
@@ -33,8 +34,10 @@ export class FilesController {
   }
 
   @Get()
-  async findAll(@Query('type') type: string) {
-    return this.filesService.findAllWithType(type);
+  async findAll(@Query('type') type?: string) {
+    let query: FilterQuery<File> = {};
+    if (type) query.file_type = type;
+    return this.filesService.findAll(query);
   }
 
   @Get(':id')

@@ -24,7 +24,10 @@ let FilesController = class FilesController {
         return this.filesService.uploadFiles(files);
     }
     async findAll(type) {
-        return this.filesService.findAllWithType(type);
+        let query = {};
+        if (type)
+            query.file_type = type;
+        return this.filesService.findAll(query);
     }
     async findOne(id, res) {
         const { stream } = await this.filesService.findOne(id);

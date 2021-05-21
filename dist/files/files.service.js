@@ -42,16 +42,15 @@ let FilesService = class FilesService {
             };
         }));
     }
-    async findAllWithType(fileType) {
-        const fileInfos = await this.filesRepository.find({
-            file_type: fileType,
-        });
+    async findAll(filterQuery) {
+        const fileInfos = await this.filesRepository.find(filterQuery);
         return Promise.all(fileInfos.map(async (file) => {
             const url = await this.s3Manager.generatePresignedUrl(file.fileId);
             return {
                 fileId: file.fileId,
                 file_type: file.file_type,
                 filename: file.filename,
+                updated: file.updated,
                 url: url,
             };
         }));

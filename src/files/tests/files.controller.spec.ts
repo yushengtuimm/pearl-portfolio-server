@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FunctionResult } from 'src/utils/functionResult';
+import { FileWithUrlDto } from '../dto/fileWithUrl.dto';
 import { FilesController } from '../files.controller';
 import { FilesService } from '../files.service';
 import { files, fileInfos } from '../mocks/data';
-import { File, FileWithUrl } from '../schemas/file.schema';
+import { File } from '../schemas/file.schema';
 
 describe('FilesController', () => {
   let controller: FilesController;
@@ -39,14 +40,15 @@ describe('FilesController', () => {
       );
     }),
 
-    findAllWithType: jest.fn().mockImplementation((type) => {
+    findAll: jest.fn().mockImplementation((type) => {
       return Promise.resolve(
         fileInfos.map((info) => {
           if (info.file_type === type) {
-            const res: FileWithUrl = {
+            const res: FileWithUrlDto = {
               fileId: info.fileId,
               file_type: info.file_type,
               filename: info.filename,
+              updated: info.updated,
               url: 'https://s3.amazonaws.com/',
             };
             return res;
