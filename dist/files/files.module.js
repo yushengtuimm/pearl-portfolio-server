@@ -19,7 +19,16 @@ let FilesModule = class FilesModule {
 FilesModule = __decorate([
     common_1.Module({
         imports: [
-            mongoose_1.MongooseModule.forFeature([{ name: file_schema_1.File.name, schema: file_schema_1.FileSchema }]),
+            mongoose_1.MongooseModule.forFeatureAsync([
+                {
+                    name: file_schema_1.File.name,
+                    useFactory: () => {
+                        const schema = file_schema_1.FileSchema;
+                        schema.plugin(require('mongoose-paginate-v2'));
+                        return schema;
+                    },
+                },
+            ]),
             s3_manager_module_1.S3ManagerModule,
         ],
         controllers: [files_controller_1.FilesController],

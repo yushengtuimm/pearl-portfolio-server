@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FileWithUrlDto = void 0;
+exports.paginateResult = exports.fileDTO = exports.FileWithUrlDto = void 0;
 const class_validator_1 = require("class-validator");
 class FileWithUrlDto {
 }
@@ -34,4 +34,30 @@ __decorate([
     __metadata("design:type", String)
 ], FileWithUrlDto.prototype, "url", void 0);
 exports.FileWithUrlDto = FileWithUrlDto;
+function fileDTO(file, url) {
+    return {
+        fileId: file.fileId,
+        file_type: file.file_type,
+        filename: file.filename,
+        updated: file.updated,
+        url: url,
+    };
+}
+exports.fileDTO = fileDTO;
+function paginateResult(result, docs) {
+    return {
+        docs: docs,
+        totalDocs: result.totalDocs,
+        offset: result.offset,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        page: result.page,
+        pagingCounter: result.pagingCounter,
+        hasPrevPage: result.hasPrevPage,
+        hasNextPage: result.hasNextPage,
+        prevPage: result.prevPage,
+        nextPage: result.nextPage,
+    };
+}
+exports.paginateResult = paginateResult;
 //# sourceMappingURL=fileWithUrl.dto.js.map

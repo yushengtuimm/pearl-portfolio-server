@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FilesRepository = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const mongoose_2 = require("mongoose");
 const file_schema_1 = require("./schemas/file.schema");
 let FilesRepository = class FilesRepository {
     constructor(fileModel) {
@@ -31,8 +30,8 @@ let FilesRepository = class FilesRepository {
     async findOne(fileFilterQuery) {
         return this.fileModel.findOne(fileFilterQuery);
     }
-    async find(fileFilterQuery) {
-        return this.fileModel.find(fileFilterQuery);
+    async find(fileFilterQuery, paginateOptions) {
+        return this.fileModel.paginate(fileFilterQuery, paginateOptions);
     }
     async create(file) {
         const newFile = file;
@@ -45,7 +44,7 @@ let FilesRepository = class FilesRepository {
 FilesRepository = __decorate([
     common_1.Injectable(),
     __param(0, mongoose_1.InjectModel(file_schema_1.File.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __metadata("design:paramtypes", [Object])
 ], FilesRepository);
 exports.FilesRepository = FilesRepository;
 //# sourceMappingURL=files.repository.js.map

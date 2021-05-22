@@ -13,6 +13,7 @@ exports.FilesService = void 0;
 const common_1 = require("@nestjs/common");
 const s3_manager_service_1 = require("../s3-manager/s3-manager.service");
 const files_repository_1 = require("./files.repository");
+const fileWithUrl_dto_1 = require("./dto/fileWithUrl.dto");
 let FilesService = class FilesService {
     constructor(filesRepository, s3Manager) {
         this.filesRepository = filesRepository;
@@ -42,18 +43,22 @@ let FilesService = class FilesService {
             };
         }));
     }
-    async findAll(filterQuery) {
-        const fileInfos = await this.filesRepository.find(filterQuery);
-        return Promise.all(fileInfos.map(async (file) => {
-            const url = await this.s3Manager.generatePresignedUrl(file.fileId);
-            return {
-                fileId: file.fileId,
-                file_type: file.file_type,
-                filename: file.filename,
-                updated: file.updated,
-                url: url,
-            };
-        }));
+    async findAll(type, offset, limit) {
+        let query = {};
+        if (type)
+            query.file_type = type;
+        let option = {
+            offset: offset,
+            limit: limit,
+        };
+        const fileInfos = await this.filesRepository.find(query, option);
+        const newDocs = [];
+        for (const doc of fileInfos.docs) {
+            const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
+            newDocs.push(fileWithUrl_dto_1.fileDTO(doc, url));
+        }
+        const newFileInfos = fileWithUrl_dto_1.paginateResult(fileInfos, newDocs);
+        return newFileInfos;
     }
     async findOne(fileId) {
         const fileInfo = await this.filesRepository.findOne({ fileId });

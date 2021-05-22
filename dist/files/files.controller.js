@@ -23,11 +23,8 @@ let FilesController = class FilesController {
     async upload(files) {
         return this.filesService.uploadFiles(files);
     }
-    async findAll(type) {
-        let query = {};
-        if (type)
-            query.file_type = type;
-        return this.filesService.findAll(query);
+    async findAll(type, offset = 0, limit = 5) {
+        return this.filesService.findAll(type, offset, limit);
     }
     async findOne(id, res) {
         const { stream } = await this.filesService.findOne(id);
@@ -48,8 +45,10 @@ __decorate([
 __decorate([
     common_1.Get(),
     __param(0, common_1.Query('type')),
+    __param(1, common_1.Query('offset')),
+    __param(2, common_1.Query('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], FilesController.prototype, "findAll", null);
 __decorate([
