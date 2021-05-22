@@ -348,16 +348,25 @@ exports.FilesModule = void 0;
 const common_1 = __webpack_require__(5);
 const mongoose_1 = __webpack_require__(12);
 const files_service_1 = __webpack_require__(13);
-const files_controller_1 = __webpack_require__(20);
-const s3_manager_module_1 = __webpack_require__(23);
-const file_schema_1 = __webpack_require__(19);
+const files_controller_1 = __webpack_require__(21);
+const s3_manager_module_1 = __webpack_require__(24);
+const file_schema_1 = __webpack_require__(18);
 const files_repository_1 = __webpack_require__(17);
 let FilesModule = class FilesModule {
 };
 FilesModule = __decorate([
     common_1.Module({
         imports: [
-            mongoose_1.MongooseModule.forFeature([{ name: file_schema_1.File.name, schema: file_schema_1.FileSchema }]),
+            mongoose_1.MongooseModule.forFeatureAsync([
+                {
+                    name: file_schema_1.File.name,
+                    useFactory: () => {
+                        const schema = file_schema_1.FileSchema;
+                        schema.plugin(__webpack_require__(25));
+                        return schema;
+                    },
+                },
+            ]),
             s3_manager_module_1.S3ManagerModule,
         ],
         controllers: [files_controller_1.FilesController],
@@ -395,6 +404,7 @@ exports.FilesService = void 0;
 const common_1 = __webpack_require__(5);
 const s3_manager_service_1 = __webpack_require__(14);
 const files_repository_1 = __webpack_require__(17);
+const fileWithUrl_dto_1 = __webpack_require__(19);
 let FilesService = class FilesService {
     constructor(filesRepository, s3Manager) {
         this.filesRepository = filesRepository;
@@ -424,18 +434,22 @@ let FilesService = class FilesService {
             };
         }));
     }
-    async findAll(filterQuery) {
-        const fileInfos = await this.filesRepository.find(filterQuery);
-        return Promise.all(fileInfos.map(async (file) => {
-            const url = await this.s3Manager.generatePresignedUrl(file.fileId);
-            return {
-                fileId: file.fileId,
-                file_type: file.file_type,
-                filename: file.filename,
-                updated: file.updated,
-                url: url,
-            };
-        }));
+    async findAll(type, offset, limit) {
+        let query = {};
+        if (type)
+            query.file_type = type;
+        let option = {
+            offset: offset,
+            limit: limit,
+        };
+        const fileInfos = await this.filesRepository.find(query, option);
+        const newDocs = [];
+        for (const doc of fileInfos.docs) {
+            const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
+            newDocs.push(fileWithUrl_dto_1.fileDTO(doc, url));
+        }
+        const newFileInfos = fileWithUrl_dto_1.paginateResult(fileInfos, newDocs);
+        return newFileInfos;
     }
     async findOne(fileId) {
         const fileInfo = await this.filesRepository.findOne({ fileId });
@@ -561,8 +575,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FilesRepository = void 0;
 const common_1 = __webpack_require__(5);
 const mongoose_1 = __webpack_require__(12);
-const mongoose_2 = __webpack_require__(18);
-const file_schema_1 = __webpack_require__(19);
+const file_schema_1 = __webpack_require__(18);
 let FilesRepository = class FilesRepository {
     constructor(fileModel) {
         this.fileModel = fileModel;
@@ -577,8 +590,8 @@ let FilesRepository = class FilesRepository {
     async findOne(fileFilterQuery) {
         return this.fileModel.findOne(fileFilterQuery);
     }
-    async find(fileFilterQuery) {
-        return this.fileModel.find(fileFilterQuery);
+    async find(fileFilterQuery, paginateOptions) {
+        return this.fileModel.paginate(fileFilterQuery, paginateOptions);
     }
     async create(file) {
         const newFile = file;
@@ -591,20 +604,13 @@ let FilesRepository = class FilesRepository {
 FilesRepository = __decorate([
     common_1.Injectable(),
     __param(0, mongoose_1.InjectModel(file_schema_1.File.name)),
-    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_schema_1.FileModel !== "undefined" && file_schema_1.FileModel) === "function" ? _a : Object])
 ], FilesRepository);
 exports.FilesRepository = FilesRepository;
 
 
 /***/ }),
 /* 18 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("mongoose");;
-
-/***/ }),
-/* 19 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -649,7 +655,84 @@ exports.FileSchema = mongoose_1.SchemaFactory.createForClass(File);
 
 
 /***/ }),
+/* 19 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.paginateResult = exports.fileDTO = exports.FileWithUrlDto = void 0;
+const class_validator_1 = __webpack_require__(20);
+class FileWithUrlDto {
+}
+__decorate([
+    class_validator_1.IsString(),
+    __metadata("design:type", String)
+], FileWithUrlDto.prototype, "fileId", void 0);
+__decorate([
+    class_validator_1.IsString(),
+    __metadata("design:type", String)
+], FileWithUrlDto.prototype, "file_type", void 0);
+__decorate([
+    class_validator_1.IsString(),
+    __metadata("design:type", String)
+], FileWithUrlDto.prototype, "filename", void 0);
+__decorate([
+    class_validator_1.IsDate(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], FileWithUrlDto.prototype, "updated", void 0);
+__decorate([
+    class_validator_1.IsUrl(),
+    __metadata("design:type", String)
+], FileWithUrlDto.prototype, "url", void 0);
+exports.FileWithUrlDto = FileWithUrlDto;
+function fileDTO(file, url) {
+    return {
+        fileId: file.fileId,
+        file_type: file.file_type,
+        filename: file.filename,
+        updated: file.updated,
+        url: url,
+    };
+}
+exports.fileDTO = fileDTO;
+function paginateResult(result, docs) {
+    return {
+        docs: docs,
+        totalDocs: result.totalDocs,
+        offset: result.offset,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        page: result.page,
+        pagingCounter: result.pagingCounter,
+        hasPrevPage: result.hasPrevPage,
+        hasNextPage: result.hasNextPage,
+        prevPage: result.prevPage,
+        nextPage: result.nextPage,
+    };
+}
+exports.paginateResult = paginateResult;
+
+
+/***/ }),
 /* 20 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("class-validator");;
+
+/***/ }),
+/* 21 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -666,13 +749,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FilesController = void 0;
 const common_1 = __webpack_require__(5);
-const platform_express_1 = __webpack_require__(21);
+const platform_express_1 = __webpack_require__(22);
 const files_service_1 = __webpack_require__(13);
-const express_1 = __webpack_require__(22);
+const express_1 = __webpack_require__(23);
 let FilesController = class FilesController {
     constructor(filesService) {
         this.filesService = filesService;
@@ -680,11 +763,8 @@ let FilesController = class FilesController {
     async upload(files) {
         return this.filesService.uploadFiles(files);
     }
-    async findAll(type) {
-        let query = {};
-        if (type)
-            query.file_type = type;
-        return this.filesService.findAll(query);
+    async findAll(type, offset = 0, limit = 5) {
+        return this.filesService.findAll(type, offset, limit);
     }
     async findOne(id, res) {
         const { stream } = await this.filesService.findOne(id);
@@ -705,15 +785,17 @@ __decorate([
 __decorate([
     common_1.Get(),
     __param(0, common_1.Query('type')),
+    __param(1, common_1.Query('offset')),
+    __param(2, common_1.Query('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], FilesController.prototype, "findAll", null);
 __decorate([
     common_1.Get(':id'),
     __param(0, common_1.Param('id')), __param(1, common_1.Res()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_b = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [String, typeof (_c = typeof express_1.Response !== "undefined" && express_1.Response) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], FilesController.prototype, "findOne", null);
 __decorate([
@@ -725,27 +807,27 @@ __decorate([
 ], FilesController.prototype, "remove", null);
 FilesController = __decorate([
     common_1.Controller('files'),
-    __metadata("design:paramtypes", [typeof (_c = typeof files_service_1.FilesService !== "undefined" && files_service_1.FilesService) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_d = typeof files_service_1.FilesService !== "undefined" && files_service_1.FilesService) === "function" ? _d : Object])
 ], FilesController);
 exports.FilesController = FilesController;
 
-
-/***/ }),
-/* 21 */
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("@nestjs/platform-express");;
 
 /***/ }),
 /* 22 */
 /***/ ((module) => {
 
 "use strict";
-module.exports = require("express");;
+module.exports = require("@nestjs/platform-express");;
 
 /***/ }),
 /* 23 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("express");;
+
+/***/ }),
+/* 24 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -774,6 +856,13 @@ S3ManagerModule = __decorate([
 ], S3ManagerModule);
 exports.S3ManagerModule = S3ManagerModule;
 
+
+/***/ }),
+/* 25 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("mongoose-paginate-v2");;
 
 /***/ })
 /******/ 	]);
@@ -837,7 +926,7 @@ exports.S3ManagerModule = S3ManagerModule;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("f654d2f510b479d9a95e")
+/******/ 		__webpack_require__.h = () => ("878a41ba5dcbf3b0839a")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

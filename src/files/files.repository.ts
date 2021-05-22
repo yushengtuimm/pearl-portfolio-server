@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
-import { File, FileDocument } from './schemas/file.schema';
+import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
+import { File, FileDocument, FileModel } from './schemas/file.schema';
 
 @Injectable()
 export class FilesRepository {
   constructor(
-    @InjectModel(File.name) private readonly fileModel: Model<FileDocument>,
+    @InjectModel(File.name) private readonly fileModel: FileModel<FileDocument>,
   ) {}
 
   async exist(fileFilterQuery: FilterQuery<File>): Promise<boolean> {
@@ -19,8 +19,11 @@ export class FilesRepository {
     return this.fileModel.findOne(fileFilterQuery);
   }
 
-  async find(fileFilterQuery: FilterQuery<File>): Promise<File[]> {
-    return this.fileModel.find(fileFilterQuery);
+  async find(
+    fileFilterQuery: FilterQuery<File>,
+    paginateOptions: PaginateOptions,
+  ): Promise<PaginateResult<File>> {
+    return this.fileModel.paginate(fileFilterQuery, paginateOptions);
   }
 
   async create(file: File): Promise<File> {

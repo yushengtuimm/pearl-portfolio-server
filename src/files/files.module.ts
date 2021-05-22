@@ -8,7 +8,16 @@ import { FilesRepository } from './files.repository';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: File.name, schema: FileSchema }]),
+    MongooseModule.forFeatureAsync([
+      {
+        name: File.name,
+        useFactory: () => {
+          const schema = FileSchema;
+          schema.plugin(require('mongoose-paginate-v2'));
+          return schema;
+        },
+      },
+    ]),
     S3ManagerModule,
   ],
   controllers: [FilesController],

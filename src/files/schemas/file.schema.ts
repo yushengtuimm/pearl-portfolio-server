@@ -1,8 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document, PaginateModel } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 export type FileDocument = File & Document;
+
+export interface FileModel<T extends Document> extends PaginateModel<T> {}
 
 @Schema()
 export class File {

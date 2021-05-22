@@ -1,8 +1,5 @@
 import {
-  HttpException,
   Injectable,
-  HttpStatus,
-  InternalServerErrorException,
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
@@ -10,8 +7,8 @@ import { S3ManagerService } from '../s3-manager/s3-manager.service';
 import { File } from './schemas/file.schema';
 import { FilesRepository } from './files.repository';
 import { FunctionResult } from '../utils/functionResult';
-import { FileWithUrlDto } from './dto/fileWithUrl.dto';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
+import { FileWithUrlDto, fileDTO, paginateResult } from './dto/fileWithUrl.dto';
 
 @Injectable()
 export class FilesService {
@@ -57,20 +54,31 @@ export class FilesService {
     );
   }
 
-  async findAll(filterQuery: FilterQuery<File>): Promise<FileWithUrlDto[]> {
-    const fileInfos = await this.filesRepository.find(filterQuery);
-    return Promise.all(
-      fileInfos.map(async (file) => {
-        const url = await this.s3Manager.generatePresignedUrl(file.fileId);
-        return {
-          fileId: file.fileId,
-          file_type: file.file_type,
-          filename: file.filename,
-          updated: file.updated,
-          url: url,
-        };
-      }),
-    );
+  async findAll(
+    type: string,
+    offset: number,
+    limit: number,
+  ): Promise<PaginateResult<FileWithUrlDto>> {
+    let query: FilterQuery<File> = {};
+    if (type) query.file_type = type;
+
+    let option: PaginateOptions = {
+      offset: offset,
+      limit: limit,
+    };
+
+    const fileInfos = await this.filesRepository.find(query, option);
+    const newDocs: FileWithUrlDto[] = [];
+    for (const doc of fileInfos.docs) {
+      const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
+      newDocs.push(fileDTO(doc, url));
+    }
+
+    const newFileInfos: PaginateResult<FileWithUrlDto> = paginateResult<
+      File,
+      FileWithUrlDto
+    >(fileInfos, newDocs);
+    return newFileInfos;
   }
 
   async findOne(fileId: string) {

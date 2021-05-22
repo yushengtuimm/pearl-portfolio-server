@@ -9,17 +9,16 @@ import {
   Delete,
   Req,
   Res,
-  UploadedFile,
   UploadedFiles,
   UseInterceptors,
-  HttpException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { Response, Request } from 'express';
 import { File } from './schemas/file.schema';
 import { FunctionResult } from '../utils/functionResult';
-import { FilterQuery } from 'mongoose';
+import { PaginateResult } from 'mongoose';
+import { FileWithUrlDto } from './dto/fileWithUrl.dto';
 
 @Controller('files')
 export class FilesController {
@@ -34,10 +33,12 @@ export class FilesController {
   }
 
   @Get()
-  async findAll(@Query('type') type?: string) {
-    let query: FilterQuery<File> = {};
-    if (type) query.file_type = type;
-    return this.filesService.findAll(query);
+  async findAll(
+    @Query('type') type?: string,
+    @Query('offset') offset = 0,
+    @Query('limit') limit = 5,
+  ): Promise<PaginateResult<FileWithUrlDto>> {
+    return this.filesService.findAll(type, offset, limit);
   }
 
   @Get(':id')

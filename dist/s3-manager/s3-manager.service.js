@@ -48,7 +48,7 @@ let S3ManagerService = class S3ManagerService {
             Bucket: this.configService.get('AWS_BUCKET_NAME'),
             Body: dataBuffer,
             Key: `${uuid_1.v4() + '.' + file_ext}`,
-            ContentType: 'pdf',
+            ContentType: file_ext === 'pdf' ? 'application/pdf' : null,
         })
             .promise();
     }
