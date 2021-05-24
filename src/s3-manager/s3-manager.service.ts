@@ -37,12 +37,29 @@ export class S3ManagerService {
     dataBuffer: Buffer,
     file_ext: string,
   ): Promise<S3.ManagedUpload.SendData> {
+    let contentType = 'application/octet-stream';
+    switch (file_ext) {
+      case 'pdf':
+        contentType = 'application/pdf';
+      case 'jpg':
+        contentType = '	image/jpg';
+    }
+
     return this.s3
       .upload({
         Bucket: this.configService.get('AWS_BUCKET_NAME'),
         Body: dataBuffer,
         Key: `${uuid() + '.' + file_ext}`,
-        ContentType: file_ext === 'pdf' ? 'application/pdf' : null,
+        ContentType: contentType,
+      })
+      .promise();
+  }
+
+  async delete(key: string) {
+    return this.s3
+      .deleteObject({
+        Bucket: this.configService.get('AWS_BUCKET_NAME'),
+        Key: key,
       })
       .promise();
   }

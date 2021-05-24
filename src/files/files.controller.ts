@@ -55,6 +55,6 @@ export class FilesController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.filesService.remove(+id);
+    return this.filesService.remove(id);
   }
 }

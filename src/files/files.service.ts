@@ -93,7 +93,6 @@ export class FilesService {
 
   async findFile(filename: string): Promise<FileWithUrlDto> {
     const doc = await this.filesRepository.findOne({ filename });
-    console.log(doc);
     if (doc) {
       const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
       return fileDTO(doc, url);
@@ -103,7 +102,8 @@ export class FilesService {
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} file`;
+  async remove(id: string) {
+    const s3Res = await this.s3Manager.delete(id);
+    const res = await this.filesRepository.delete({ fileId: id });
   }
 }

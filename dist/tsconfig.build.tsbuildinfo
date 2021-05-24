@@ -3202,8 +3202,8 @@
         "affectsGlobalScope": false
       },
       "../src/s3-manager/s3-manager.service.ts": {
-        "version": "4bfeb195dc268d1c8d26d4df9660d394abfb23d11f5907e1b2eaf79ff18551ab",
-        "signature": "872c82fea07b82d1a2b1f6eef82c7d7eacf05a6997c4d5b16206c4cab099c408",
+        "version": "40d0bad1ac0912b3cb8e77e55ec0ea4b58b85cffd644eb8efad998516f6bb93c",
+        "signature": "c5f69972db366af5f2f07be7bfaca53765d0d2d65f793f0a3d8f5f628e02bff4",
         "affectsGlobalScope": false
       },
       "../src/files/schemas/file.schema.ts": {
@@ -3212,8 +3212,8 @@
         "affectsGlobalScope": false
       },
       "../src/files/files.repository.ts": {
-        "version": "aa4fd7ca9afd6fef39e81695819754accedb7f7d65fa7cc0bdb1ed2bd435ef9d",
-        "signature": "71f2aa1306e14af1b04a803bc0a8af23fff640a3d1204d1d6835754b8d54ab50",
+        "version": "498a44c2070c70dce34cb9a1d12f0fb24e66bef640fd703d56b5f4246abbb6b0",
+        "signature": "545dd22a8d2ba6e526875a771da31af22c47cc5bb0a62b0cb1a23dedb7c1da8d",
         "affectsGlobalScope": false
       },
       "../src/utils/functionResult.ts": {
@@ -3852,8 +3852,8 @@
         "affectsGlobalScope": false
       },
       "../src/files/files.service.ts": {
-        "version": "8303c0bd0fbe5c9da5c7c51e4f9ba1ef09ab5e49afa614500b46cc6f5743d863",
-        "signature": "bd9b134da969c3a38b243653ee9474203d668b3f11c5891d987ea074d195417f",
+        "version": "a1f118583a0b4a78f3d768ac2b5ab802756dfcc7c9f6f07080ba992922eb308e",
+        "signature": "f1cd91d68c69c1febdc951fb94a04f2c4246cca223672407567e12aeed6cd861",
         "affectsGlobalScope": false
       },
       "../node_modules/@nestjs/core/adapters/http-adapter.d.ts": {
@@ -3982,8 +3982,8 @@
         "affectsGlobalScope": false
       },
       "../src/files/files.controller.ts": {
-        "version": "0771b0ea604ef295050d0b050e1291f40b1cde7b3d6c4a2664728ec101ef1f4b",
-        "signature": "4e23d3b4daf938161866a2c068905f7b1c485b9a69da7374be465058976f74f4",
+        "version": "612aa4622bcabf721cbb67b388aa2172c220fa06c7cb20df5a77935ff7b6fd29",
+        "signature": "72178ab92223d0b782492b615e90dcb6b373168e438a34da1c43156843c1d4da",
         "affectsGlobalScope": false
       },
       "../src/s3-manager/s3-manager.module.ts": {
@@ -16472,7 +16472,8 @@
       "../src/s3-manager/s3-manager.service.ts": [
         "../node_modules/@nestjs/config/index.d.ts",
         "../node_modules/@types/node/stream.d.ts",
-        "../node_modules/aws-sdk/index.d.ts"
+        "../node_modules/aws-sdk/index.d.ts",
+        "../node_modules/aws-sdk/lib/request.d.ts"
       ],
       "../src/utils/functionResult.ts": [
         "../node_modules/@nestjs/common/index.d.ts"

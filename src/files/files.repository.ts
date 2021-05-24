@@ -37,4 +37,8 @@ export class FilesRepository {
   ): Promise<File> {
     return this.fileModel.findOneAndUpdate(fileFilterQuery, file);
   }
+
+  async delete(fileFilterQuery: FilterQuery<File>) {
+    return this.fileModel.deleteOne(fileFilterQuery);
+  }
 }

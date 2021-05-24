@@ -467,8 +467,9 @@ let FilesService = class FilesService {
         }
         throw new common_1.NotFoundException(`cannot find file with name [${doc.filename}] in cloud storage.`);
     }
-    remove(id) {
-        return `This action removes a #${id} file`;
+    async remove(id) {
+        const s3Res = await this.s3Manager.delete(id);
+        const res = await this.filesRepository.delete({ fileId: id });
     }
 };
 FilesService = __decorate([
@@ -529,12 +530,28 @@ let S3ManagerService = class S3ManagerService {
         });
     }
     async uploadFileToBucket(dataBuffer, file_ext) {
+        let contentType = 'application/octet-stream';
+        switch (file_ext) {
+            case 'pdf':
+                contentType = 'application/pdf';
+            case 'jpg':
+                contentType = '	image/jpg';
+        }
+        console.log(contentType);
         return this.s3
             .upload({
             Bucket: this.configService.get('AWS_BUCKET_NAME'),
             Body: dataBuffer,
             Key: `${uuid_1.v4() + '.' + file_ext}`,
-            ContentType: file_ext === 'pdf' ? 'application/pdf' : null,
+            ContentType: contentType,
+        })
+            .promise();
+    }
+    async delete(key) {
+        return this.s3
+            .deleteObject({
+            Bucket: this.configService.get('AWS_BUCKET_NAME'),
+            Key: key,
         })
             .promise();
     }
@@ -608,6 +625,9 @@ let FilesRepository = class FilesRepository {
     }
     async findOneAndUpdate(fileFilterQuery, file) {
         return this.fileModel.findOneAndUpdate(fileFilterQuery, file);
+    }
+    async delete(fileFilterQuery) {
+        return this.fileModel.deleteOne(fileFilterQuery);
     }
 };
 FilesRepository = __decorate([
@@ -783,7 +803,7 @@ let FilesController = class FilesController {
         return this.filesService.findFile(filename);
     }
     remove(id) {
-        return this.filesService.remove(+id);
+        return this.filesService.remove(id);
     }
 };
 __decorate([
@@ -945,7 +965,7 @@ module.exports = require("mongoose-paginate-v2");;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("625955567bee831bcd1f")
+/******/ 		__webpack_require__.h = () => ("7ed98406971d117d59d7")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
