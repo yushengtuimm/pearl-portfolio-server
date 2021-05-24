@@ -19,6 +19,7 @@ import { File } from './schemas/file.schema';
 import { FunctionResult } from '../utils/functionResult';
 import { PaginateResult } from 'mongoose';
 import { FileWithUrlDto } from './dto/fileWithUrl.dto';
+import { threadId } from 'worker_threads';
 
 @Controller('files')
 export class FilesController {
@@ -45,6 +46,11 @@ export class FilesController {
   async findOne(@Param('id') id: string, @Res() res: Response) {
     const { stream } = await this.filesService.findOne(id);
     return stream.pipe(res);
+  }
+
+  @Get('/name/:filename')
+  async findFile(@Param('filename') filename: string) {
+    return this.filesService.findFile(filename);
   }
 
   @Delete(':id')

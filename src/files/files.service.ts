@@ -82,12 +82,24 @@ export class FilesService {
   }
 
   async findOne(fileId: string) {
-    const fileInfo = await this.filesRepository.findOne({ fileId });
-    if (fileInfo) {
-      return this.s3Manager.getFileFromBucket(fileInfo.fileId);
+    const doc = await this.filesRepository.findOne({ fileId });
+    if (doc) {
+      return this.s3Manager.getFileFromBucket(doc.fileId);
     }
     throw new NotFoundException(
-      `cannot find file with name [${fileInfo.filename}] in cloud storage.`,
+      `cannot find file with name [${doc.filename}] in cloud storage.`,
+    );
+  }
+
+  async findFile(filename: string): Promise<FileWithUrlDto> {
+    const doc = await this.filesRepository.findOne({ filename });
+    console.log(doc);
+    if (doc) {
+      const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
+      return fileDTO(doc, url);
+    }
+    throw new NotFoundException(
+      `cannot find file with name [${doc.filename}] in cloud storage.`,
     );
   }
 
