@@ -1,5 +1,13 @@
+exports.id = 0;
+exports.ids = null;
+exports.modules = {
+
+/***/ 30:
+/***/ ((__unused_webpack_module, exports) => {
+
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 function processBackgroundColor(color) {
     let newColor = color;
     if (newColor.charAt(0) != '#') {
@@ -44,10 +52,10 @@ function isHex(char) {
 }
 class Options {
     constructor() {
-        this.quality = 90;
-        this.density = 96;
-        this.width;
-        this.height;
+        this.quality = 100;
+        this.density = 300;
+        this.width = 200;
+        this.height = 100;
         this.background = '"#FFFFFF"';
     }
     setDensity(density) {
@@ -121,4 +129,19 @@ class Options {
     }
 }
 exports.default = Options;
-//# sourceMappingURL=options.js.map
+
+
+/***/ })
+
+};
+exports.runtime =
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ "use strict";
+/******/ 
+/******/ /* webpack/runtime/getFullHash */
+/******/ (() => {
+/******/ 	__webpack_require__.h = () => ("6a5d3180a3e80849f460")
+/******/ })();
+/******/ 
+/******/ }
+;

@@ -55,3 +55,14 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+## Heroku buildpack
+
+```bash
+
+https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku-community/apt.tgz
+https://github.com/DuckyTeam/heroku-buildpack-imagemagick
+https://github.com/BlueTeaLondon/heroku-buildpack-libreoffice-for-heroku-18.git
+https://github.com/survantjames/heroku-buildpack-poppler.git
+
+```
