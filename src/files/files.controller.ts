@@ -14,12 +14,11 @@ import {
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { File } from './schemas/file.schema';
-import { FunctionResult } from '../utils/functionResult';
+import { FunctionResult } from '../../utils/functionResult';
 import { PaginateResult } from 'mongoose';
 import { FileWithUrlDto } from './dto/fileWithUrl.dto';
-import { threadId } from 'worker_threads';
 
 @Controller('files')
 export class FilesController {

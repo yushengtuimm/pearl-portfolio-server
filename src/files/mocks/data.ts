@@ -1,4 +1,4 @@
-import { FunctionResult } from '../../utils/functionResult';
+import { FunctionResult } from '../../../utils/functionResult';
 import { Readable } from 'stream';
 import { File } from '../schemas/file.schema';
 

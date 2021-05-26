@@ -1,4 +1,4 @@
-import { IsString, IsDate, IsUrl } from 'class-validator';
+import { IsString, IsDate, IsUrl, IsArray } from 'class-validator';
 import { PaginateResult } from 'mongoose';
 import { File } from '../schemas/file.schema';
 
@@ -15,6 +15,9 @@ export class FileWithUrlDto {
   @IsDate()
   updated: Date;
 
+  @IsArray()
+  childs: string[];
+
   @IsUrl()
   url: string;
 }
@@ -25,6 +28,7 @@ export function fileDTO(file: File, url: string): FileWithUrlDto {
     file_type: file.file_type,
     filename: file.filename,
     updated: file.updated,
+    childs: file.childs,
     url: url,
   };
 }

@@ -348,8 +348,8 @@ exports.FilesModule = void 0;
 const common_1 = __webpack_require__(5);
 const mongoose_1 = __webpack_require__(12);
 const files_service_1 = __webpack_require__(13);
-const files_controller_1 = __webpack_require__(21);
-const s3_manager_module_1 = __webpack_require__(24);
+const files_controller_1 = __webpack_require__(32);
+const s3_manager_module_1 = __webpack_require__(35);
 const file_schema_1 = __webpack_require__(18);
 const files_repository_1 = __webpack_require__(17);
 let FilesModule = class FilesModule {
@@ -362,7 +362,7 @@ FilesModule = __decorate([
                     name: file_schema_1.File.name,
                     useFactory: () => {
                         const schema = file_schema_1.FileSchema;
-                        schema.plugin(__webpack_require__(25));
+                        schema.plugin(__webpack_require__(36));
                         return schema;
                     },
                 },
@@ -405,6 +405,9 @@ const common_1 = __webpack_require__(5);
 const s3_manager_service_1 = __webpack_require__(14);
 const files_repository_1 = __webpack_require__(17);
 const fileWithUrl_dto_1 = __webpack_require__(19);
+const ppt2png_1 = __webpack_require__(21);
+const path_1 = __webpack_require__(28);
+const fs_1 = __webpack_require__(27);
 let FilesService = class FilesService {
     constructor(filesRepository, s3Manager) {
         this.filesRepository = filesRepository;
@@ -423,10 +426,44 @@ let FilesService = class FilesService {
             }
             const extention = filename.split('.').pop();
             const uploadResult = await this.s3Manager.uploadFileToBucket(buffer, extention);
+            const childs = [];
+            if (extention == 'pptx' || extention == 'ppt') {
+                const dir = path_1.join(__dirname, 'public');
+                if (!fs_1.existsSync(dir))
+                    fs_1.mkdirSync(dir);
+                const tempFilePath = path_1.join(dir + '/' + filename);
+                fs_1.writeFileSync(tempFilePath, buffer);
+                const converter = ppt2png_1.default.create({
+                    files: [tempFilePath],
+                    output: dir + '/',
+                });
+                converter.convert();
+                const tempFiles = fs_1.readdirSync(dir);
+                const pngFiles = tempFiles.filter((file) => path_1.extname(file) === '.png');
+                for (const pngName of pngFiles) {
+                    const pngFile = path_1.join(dir, pngName);
+                    const pngBuffer = fs_1.readFileSync(pngFile);
+                    const pngUploadResult = await this.s3Manager.uploadFileToBucket(pngBuffer, 'png');
+                    const pngFileInfo = await this.filesRepository.create({
+                        fileId: pngUploadResult.Key,
+                        filename: pngName,
+                        file_type: 'png',
+                    });
+                    childs.push(pngFileInfo.fileId);
+                }
+                tempFiles.forEach((item) => {
+                    fs_1.unlink(path_1.join(dir, item), (err) => {
+                        if (err) {
+                            return;
+                        }
+                    });
+                });
+            }
             const fileInfo = await this.filesRepository.create({
                 fileId: uploadResult.Key,
                 filename: filename,
                 file_type: extention,
+                childs: childs,
             });
             return {
                 success: true,
@@ -460,14 +497,33 @@ let FilesService = class FilesService {
     }
     async findFile(filename) {
         const doc = await this.filesRepository.findOne({ filename });
-        console.log(doc);
         if (doc) {
-            const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
-            return fileWithUrl_dto_1.fileDTO(doc, url);
+            if (doc.childs) {
+                const res = [];
+                for (const child of doc.childs) {
+                    const info = await this.filesRepository.findOne({ fileId: child });
+                    const url = await this.s3Manager.generatePresignedUrl(child);
+                    res.push(fileWithUrl_dto_1.fileDTO(info, url));
+                }
+                return res;
+            }
+            else {
+                const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
+                return fileWithUrl_dto_1.fileDTO(doc, url);
+            }
         }
         throw new common_1.NotFoundException(`cannot find file with name [${doc.filename}] in cloud storage.`);
     }
     async remove(id) {
+        const fileInfo = await this.filesRepository.findOne({ fileId: id });
+        if (fileInfo) {
+            await this.filesRepository.delete({
+                fileId: { $in: fileInfo.childs },
+            });
+            fileInfo.childs.forEach(async (pngFile) => {
+                await this.s3Manager.delete(pngFile);
+            });
+        }
         const s3Res = await this.s3Manager.delete(id);
         const res = await this.filesRepository.delete({ fileId: id });
     }
@@ -535,9 +591,10 @@ let S3ManagerService = class S3ManagerService {
             case 'pdf':
                 contentType = 'application/pdf';
             case 'jpg':
-                contentType = '	image/jpg';
+                contentType = 'image/jpeg';
+            case 'png':
+                contentType = 'image/png';
         }
-        console.log(contentType);
         return this.s3
             .upload({
             Bucket: this.configService.get('AWS_BUCKET_NAME'),
@@ -620,14 +677,13 @@ let FilesRepository = class FilesRepository {
         return this.fileModel.paginate(fileFilterQuery, paginateOptions);
     }
     async create(file) {
-        const newFile = file;
-        return this.fileModel.create(newFile);
+        return this.fileModel.create(file);
     }
     async findOneAndUpdate(fileFilterQuery, file) {
         return this.fileModel.findOneAndUpdate(fileFilterQuery, file);
     }
     async delete(fileFilterQuery) {
-        return this.fileModel.deleteOne(fileFilterQuery);
+        return this.fileModel.deleteMany(fileFilterQuery);
     }
 };
 FilesRepository = __decorate([
@@ -672,6 +728,10 @@ __decorate([
     mongoose_1.Prop({ type: String, required: true }),
     __metadata("design:type", String)
 ], File.prototype, "filename", void 0);
+__decorate([
+    mongoose_1.Prop({ type: [String] }),
+    __metadata("design:type", Array)
+], File.prototype, "childs", void 0);
 __decorate([
     mongoose_1.Prop({ type: Date, default: Date.now }),
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
@@ -721,6 +781,10 @@ __decorate([
     __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
 ], FileWithUrlDto.prototype, "updated", void 0);
 __decorate([
+    class_validator_1.IsArray(),
+    __metadata("design:type", Array)
+], FileWithUrlDto.prototype, "childs", void 0);
+__decorate([
     class_validator_1.IsUrl(),
     __metadata("design:type", String)
 ], FileWithUrlDto.prototype, "url", void 0);
@@ -731,6 +795,7 @@ function fileDTO(file, url) {
         file_type: file.file_type,
         filename: file.filename,
         updated: file.updated,
+        childs: file.childs,
         url: url,
     };
 }
@@ -762,6 +827,638 @@ module.exports = require("class-validator");;
 
 /***/ }),
 /* 21 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _pdf2png__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(22);
+/* harmony import */ var _ppt2pdf__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(31);
+/* harmony import */ var _converter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(24);
+
+
+
+
+class Ppt2PngConverter extends _converter__WEBPACK_IMPORTED_MODULE_2__.Converter {
+  constructor() {
+    super();
+    this.files = [];
+  }
+
+  setFiles(files) {
+    if (!files || files.constructor !== Array)
+      throw new Error('Files should be a array');
+
+    this.files = files.map((file) =>
+      _converter__WEBPACK_IMPORTED_MODULE_2__.File.create({
+        filePath: file,
+      }),
+    );
+  }
+
+  convert() {
+    return this.files.map((file) => {
+      const pptConverter = _ppt2pdf__WEBPACK_IMPORTED_MODULE_1__.default.create({
+        file: file.path,
+        output: this.output,
+      });
+      pptConverter.convert();
+
+      const pdfConverter = _pdf2png__WEBPACK_IMPORTED_MODULE_0__.default.create({
+        file: pptConverter.pdf,
+        output: this.output,
+      });
+
+      return pdfConverter.convert();
+    });
+  }
+
+  static create({ files, output }) {
+    const converter = new Ppt2PngConverter();
+
+    converter.setFiles(files);
+    converter.setOutput(output);
+
+    return converter;
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Ppt2PngConverter);
+
+
+/***/ }),
+/* 22 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(23);
+/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(process__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _converter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(24);
+/* harmony import */ var _options__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(30);
+
+
+
+
+class Pdf2PngConverter extends _converter__WEBPACK_IMPORTED_MODULE_1__.Converter {
+  constructor() {
+    super();
+    this.convertString = "";
+  }
+
+  get converter() {
+    const converters = {
+      darwin: this.converterForMac,
+      win32: this.converterForWindows,
+      default: this.converterForLinux,
+    };
+
+    if (this.customConverter) return this.customConverter;
+
+    if (converters[process__WEBPACK_IMPORTED_MODULE_0__.platform]) return converters[process__WEBPACK_IMPORTED_MODULE_0__.platform];
+
+    return converters.default;
+  }
+
+  get converterForLinux() {
+    return `convert ${this.convertString} -colorspace RGB`;
+  }
+
+  get converterForMac() {
+    return `convert ${this.convertString} -colorspace RGB`;
+  }
+
+  get converterForWindows() {
+    return `magick.exe ${this.convertString} -colorspace RGB`;
+  }
+
+  get newFile() {
+    return this.output + this.oldFile.name + ".png";
+  }
+
+  setConvertString(convertString) {
+    if (!convertString) return;
+
+    if (convertString.constructor !== String)
+      throw new Error("The convert string should be a string");
+
+    this.convertString = convertString;
+  }
+
+  static create({ file, output, customConverter, density, quality }) {
+    const converter = new Pdf2PngConverter();
+    converter.setFile(file);
+    converter.setOutput(output);
+    converter.setConverter(customConverter);
+    converter.setConvertString(
+      _options__WEBPACK_IMPORTED_MODULE_2__.default.create({
+        density,
+        quality,
+      }).convertString
+    );
+
+    return converter;
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Pdf2PngConverter);
+
+
+/***/ }),
+/* 23 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");;
+
+/***/ }),
+/* 24 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "Converter": () => (/* binding */ Converter),
+/* harmony export */   "File": () => (/* reexport safe */ _file__WEBPACK_IMPORTED_MODULE_0__.default),
+/* harmony export */   "folderExists": () => (/* reexport safe */ _fs__WEBPACK_IMPORTED_MODULE_1__.folderExists),
+/* harmony export */   "fileExists": () => (/* reexport safe */ _fs__WEBPACK_IMPORTED_MODULE_1__.fileExists),
+/* harmony export */   "getFileName": () => (/* reexport safe */ _fs__WEBPACK_IMPORTED_MODULE_1__.getFileName)
+/* harmony export */ });
+/* harmony import */ var _file__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(25);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(26);
+/* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(29);
+/* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(child_process__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+
+class Converter {
+  constructor() {
+    this.oldFile = null;
+    this.output = null;
+    this.customConverter = null;
+  }
+
+  get converter() {
+    if (this.customConverter) return this.customConverter;
+
+    return "cp";
+  }
+
+  setConverter(converter) {
+    if (!converter) return;
+
+    if (converter.constructor !== String)
+      throw new Error("Converter should be a string");
+
+    this.customConverter = converter;
+  }
+
+  setFile(file) {
+    if (!file || file.constructor !== String)
+      throw new Error("File should be a string");
+
+    this.oldFile = _file__WEBPACK_IMPORTED_MODULE_0__.default.create({
+      filePath: file,
+    });
+  }
+
+  setOutput(output) {
+    if (!output || output.constructor !== String)
+      throw new Error("Output should be a string");
+
+    if (!(0,_fs__WEBPACK_IMPORTED_MODULE_1__.folderExists)(output)) throw new Error("Output folder doesnt exists");
+
+    this.output = output;
+  }
+
+  get newFile() {
+    return this.output + this.oldFile.name + this.oldFile.extension;
+  }
+
+  get execPath() {
+    return (
+      this.converter + ' "' + this.oldFile.path + '" "' + this.newFile + '"'
+    );
+  }
+
+  convert() {
+    const fileName = (0,_fs__WEBPACK_IMPORTED_MODULE_1__.getFileName)(this.oldFile.path);
+    const output = (0,child_process__WEBPACK_IMPORTED_MODULE_2__.execSync)(this.execPath);
+    return {
+      file: this.oldFile,
+      fileName,
+      output,
+    };
+  }
+
+  static create({ file, output, customConverter }) {
+    const converter = new Converter();
+    converter.setFile(file);
+    converter.setOutput(output);
+    converter.setConverter(customConverter);
+    return converter;
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Converter);
+
+
+
+/***/ }),
+/* 25 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(26);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(28);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+
+
+
+class File {
+  constructor() {
+    this.path = null;
+  }
+
+  setPath(path) {
+    if (!path || path.constructor !== String) {
+      throw new Error('File path should be a string');
+    }
+
+    if (!(0,_fs__WEBPACK_IMPORTED_MODULE_0__.fileExists)(path)) {
+      throw new Error('File path doesnt exists');
+    }
+
+    this.path = path;
+  }
+
+  get info() {
+    return path__WEBPACK_IMPORTED_MODULE_1___default().parse(this.path);
+  }
+
+  get directory() {
+    return this.info.dir;
+  }
+
+  get extension() {
+    return this.info.ext;
+  }
+
+  get base() {
+    return this.info.base;
+  }
+
+  get name() {
+    return this.info.name;
+  }
+
+  static create({ filePath }) {
+    const file = new File();
+    file.setPath(filePath);
+    return file;
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (File);
+
+
+/***/ }),
+/* 26 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "exists": () => (/* binding */ exists),
+/* harmony export */   "folderExists": () => (/* binding */ folderExists),
+/* harmony export */   "fileExists": () => (/* binding */ fileExists),
+/* harmony export */   "getFileName": () => (/* binding */ getFileName),
+/* harmony export */   "deleteFile": () => (/* binding */ deleteFile),
+/* harmony export */   "copyFile": () => (/* binding */ copyFile)
+/* harmony export */ });
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(27);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const exists = (path) => {
+  return fs__WEBPACK_IMPORTED_MODULE_0___default().existsSync(path);
+};
+
+const folderExists = (path) => {
+  if (!exists(path)) {
+    return false;
+  }
+
+  return fs__WEBPACK_IMPORTED_MODULE_0___default().statSync(path).isDirectory();
+};
+
+const fileExists = (path) => {
+  if (!exists(path)) {
+    return false;
+  }
+
+  return fs__WEBPACK_IMPORTED_MODULE_0___default().statSync(path).isFile();
+};
+
+const getFileName = (path) => {
+  return path.split("/").pop();
+};
+
+const copyFile = (from, to) => {
+  if (!fileExists(from)) {
+    return false;
+  }
+
+  return fs__WEBPACK_IMPORTED_MODULE_0___default().copyFileSync(from, to);
+};
+const deleteFile = (path) => {
+  if (!fileExists(path)) {
+    return false;
+  }
+
+  return fs__WEBPACK_IMPORTED_MODULE_0___default().unlinkSync(path);
+};
+
+
+
+
+/***/ }),
+/* 27 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs");;
+
+/***/ }),
+/* 28 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("path");;
+
+/***/ }),
+/* 29 */
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");;
+
+/***/ }),
+/* 30 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function processBackgroundColor(color) {
+  let newColor = color;
+
+  if (newColor.charAt(0) != "#") {
+    newColor = "#" + newColor;
+  }
+
+  if (newColor.length == 7) {
+    let validHex = true;
+
+    for (let i = 1; i < 7; i++) {
+      if (!isHex(newColor.charAt(i))) {
+        validHex = false;
+        break;
+      }
+    }
+    if (validHex) {
+      return '"' + newColor + '"';
+    }
+  }
+}
+
+function isHex(char) {
+  return (
+    char == "0" ||
+    char == "1" ||
+    char == "2" ||
+    char == "3" ||
+    char == "4" ||
+    char == "5" ||
+    char == "6" ||
+    char == "7" ||
+    char == "8" ||
+    char == "9" ||
+    char == "a" ||
+    char == "b" ||
+    char == "c" ||
+    char == "d" ||
+    char == "e" ||
+    char == "f" ||
+    char == "A" ||
+    char == "B" ||
+    char == "C" ||
+    char == "D" ||
+    char == "E" ||
+    char == "F"
+  );
+}
+
+class Options {
+  constructor() {
+    this.quality = 90;
+    this.density = 96;
+    this.width;
+    this.height;
+    this.background = '"#FFFFFF"';
+  }
+
+  setDensity(density) {
+    if (!density) {
+      return;
+    }
+
+    if (density.constructor !== Number || density < 10 || density > 1000) {
+      throw new Error("Density should be a valid density number");
+    }
+
+    this.density = density;
+  }
+
+  setQuality(quality) {
+    if (!quality) {
+      return;
+    }
+
+    if (quality.constructor !== Number || quality < 1 || quality > 100) {
+      throw new Error("Quality should be a valid quality number");
+    }
+
+    this.quality = quality;
+  }
+
+  setWidth(width) {
+    if (!width) {
+      return;
+    }
+
+    if (width.constructor !== Number || width < 1 || width > 10000) {
+      throw new Error("Width should be a valid width number");
+    }
+
+    this.width = width;
+  }
+
+  setHeight(height) {
+    if (!height) return;
+
+    if (height.constructor !== Number || height < 1 || height > 10000)
+      throw new Error("Height should be a valid height number");
+
+    this.height = height;
+  }
+
+  setBackground(background) {
+    if (!background) return;
+
+    if (background.constructor !== String)
+      throw new Error("Background should be a string");
+
+    this.background = processBackgroundColor(background);
+  }
+
+  get options() {
+    return [
+      {
+        key: "quality",
+        value: this.quality,
+      },
+      {
+        key: "density",
+        value: this.density,
+      },
+      {
+        key: "width",
+        value: this.width,
+      },
+      {
+        key: "height",
+        value: this.height,
+      },
+      {
+        key: "background",
+        value: this.background,
+      },
+    ].filter((option) => option.value);
+  }
+
+  get convertString() {
+    return this.options.reduce(
+      (accumulator, currentValue) =>
+        accumulator + " -" + currentValue.key + " " + currentValue.value,
+      ""
+    );
+  }
+
+  static create({ density, quality, width, height, background }) {
+    const options = new Options();
+
+    options.setDensity(density);
+    options.setQuality(quality);
+    options.setWidth(width);
+    options.setWidth(height);
+    options.setBackground(background);
+
+    return options;
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Options);
+
+
+/***/ }),
+/* 31 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(28);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
+/* harmony import */ var process__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(process__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _converter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(24);
+
+
+
+
+class Ppt2PdfConverter extends _converter__WEBPACK_IMPORTED_MODULE_2__.Converter {
+  get converter() {
+    const converters = {
+      darwin: this.converterForMac,
+      win32: this.converterForWindows,
+      default: this.converterForLinux,
+    };
+
+    if (this.customConverter) return this.customConverter;
+
+    if (converters[process__WEBPACK_IMPORTED_MODULE_1__.platform]) return converters[process__WEBPACK_IMPORTED_MODULE_1__.platform];
+
+    return converters.default;
+  }
+
+  get converterForLinux() {
+    return "libreoffice --headless --convert-to pdf --outdir";
+  }
+
+  get converterForMac() {
+    const sOfficeMac = "/Applications/LibreOffice.app/Contents/MacOS/soffice";
+    return sOfficeMac + " --headless --convert-to pdf --outdir";
+  }
+
+  get converterForWindows() {
+    return "soffice.exe --headless --convert-to pdf:writer_pdf_Export --outdir";
+  }
+
+  get execPath() {
+    return (
+      this.converter + ' "' + this.output + '" "' + this.oldFile.path + '"'
+    );
+  }
+
+  getPdfFile(fileName) {
+    return this.output + path__WEBPACK_IMPORTED_MODULE_0___default().parse(fileName).name + ".pdf";
+  }
+
+  get pdf() {
+    const fileName = (0,_converter__WEBPACK_IMPORTED_MODULE_2__.getFileName)(this.oldFile.path);
+    return this.getPdfFile(fileName);
+  }
+
+  static create({ file, output, customConverter }) {
+    const converter = new Ppt2PdfConverter();
+    converter.setFile(file);
+    converter.setOutput(output);
+    converter.setConverter(customConverter);
+    return converter;
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Ppt2PdfConverter);
+
+
+/***/ }),
+/* 32 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -782,9 +1479,9 @@ var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FilesController = void 0;
 const common_1 = __webpack_require__(5);
-const platform_express_1 = __webpack_require__(22);
+const platform_express_1 = __webpack_require__(33);
 const files_service_1 = __webpack_require__(13);
-const express_1 = __webpack_require__(23);
+const express_1 = __webpack_require__(34);
 let FilesController = class FilesController {
     constructor(filesService) {
         this.filesService = filesService;
@@ -852,21 +1549,21 @@ exports.FilesController = FilesController;
 
 
 /***/ }),
-/* 22 */
+/* 33 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("@nestjs/platform-express");;
 
 /***/ }),
-/* 23 */
+/* 34 */
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("express");;
 
 /***/ }),
-/* 24 */
+/* 35 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -897,7 +1594,7 @@ exports.S3ManagerModule = S3ManagerModule;
 
 
 /***/ }),
-/* 25 */
+/* 36 */
 /***/ ((module) => {
 
 "use strict";
@@ -949,6 +1646,30 @@ module.exports = require("mongoose-paginate-v2");;
 /******/ 	__webpack_require__.i = [];
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/get javascript update chunk filename */
 /******/ 	(() => {
 /******/ 		// This function allow to reference all chunks
@@ -965,12 +1686,23 @@ module.exports = require("mongoose-paginate-v2");;
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("7ed98406971d117d59d7")
+/******/ 		__webpack_require__.h = () => ("523a0a146820e15e650b")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hot module replacement */

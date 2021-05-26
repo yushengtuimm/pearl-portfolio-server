@@ -2,13 +2,24 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { S3ManagerService } from '../s3-manager/s3-manager.service';
 import { File } from './schemas/file.schema';
 import { FilesRepository } from './files.repository';
-import { FunctionResult } from '../utils/functionResult';
+import { FunctionResult } from '../../utils/functionResult';
 import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
 import { FileWithUrlDto, fileDTO, paginateResult } from './dto/fileWithUrl.dto';
+import Ppt2PngConverter from '../../utils/FileConverter/ppt2png';
+import { join, extname } from 'path';
+import {
+  writeFileSync,
+  readdirSync,
+  readFileSync,
+  existsSync,
+  mkdirSync,
+  unlink,
+} from 'fs';
 
 @Injectable()
 export class FilesService {
@@ -40,10 +51,56 @@ export class FilesService {
           extention,
         );
 
+        const childs = [];
+        if (extention == 'pptx' || extention == 'ppt') {
+          // genereate temp file for file converter to process
+          const dir = join(__dirname, 'public');
+          if (!existsSync(dir)) mkdirSync(dir);
+          const tempFilePath = join(dir + '/' + filename);
+          writeFileSync(tempFilePath, buffer);
+
+          // convert ppt to pdf -> pdf to png
+          const converter = Ppt2PngConverter.create({
+            files: [tempFilePath],
+            output: dir + '/',
+          });
+          converter.convert();
+
+          // read in all png files and upload to s3
+          const tempFiles = readdirSync(dir);
+          const pngFiles = tempFiles.filter((file) => extname(file) === '.png');
+          for (const pngName of pngFiles) {
+            const pngFile = join(dir, pngName);
+            const pngBuffer = readFileSync(pngFile);
+            const pngUploadResult = await this.s3Manager.uploadFileToBucket(
+              pngBuffer,
+              'png',
+            );
+
+            // push new file id to childs of parent file
+            const pngFileInfo = await this.filesRepository.create({
+              fileId: pngUploadResult.Key,
+              filename: pngName,
+              file_type: 'png',
+            });
+            childs.push(pngFileInfo.fileId);
+          }
+
+          // remove all temporary files
+          tempFiles.forEach((item) => {
+            unlink(join(dir, item), (err) => {
+              if (err) {
+                return;
+              }
+            });
+          });
+        }
+
         const fileInfo = await this.filesRepository.create({
           fileId: uploadResult.Key,
           filename: filename,
           file_type: extention,
+          childs: childs,
         });
 
         return {
@@ -91,11 +148,21 @@ export class FilesService {
     );
   }
 
-  async findFile(filename: string): Promise<FileWithUrlDto> {
+  async findFile(filename: string): Promise<FileWithUrlDto | FileWithUrlDto[]> {
     const doc = await this.filesRepository.findOne({ filename });
     if (doc) {
-      const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
-      return fileDTO(doc, url);
+      if (doc.childs) {
+        const res: FileWithUrlDto[] = [];
+        for (const child of doc.childs) {
+          const info = await this.filesRepository.findOne({ fileId: child });
+          const url = await this.s3Manager.generatePresignedUrl(child);
+          res.push(fileDTO(info, url));
+        }
+        return res;
+      } else {
+        const url = await this.s3Manager.generatePresignedUrl(doc.fileId);
+        return fileDTO(doc, url);
+      }
     }
     throw new NotFoundException(
       `cannot find file with name [${doc.filename}] in cloud storage.`,
@@ -103,6 +170,17 @@ export class FilesService {
   }
 
   async remove(id: string) {
+    const fileInfo = await this.filesRepository.findOne({ fileId: id });
+    if (fileInfo) {
+      await this.filesRepository.delete({
+        fileId: { $in: fileInfo.childs },
+      });
+
+      fileInfo.childs.forEach(async (pngFile) => {
+        await this.s3Manager.delete(pngFile);
+      });
+    }
+
     const s3Res = await this.s3Manager.delete(id);
     const res = await this.filesRepository.delete({ fileId: id });
   }

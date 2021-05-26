@@ -42,7 +42,9 @@ export class S3ManagerService {
       case 'pdf':
         contentType = 'application/pdf';
       case 'jpg':
-        contentType = '	image/jpg';
+        contentType = 'image/jpeg';
+      case 'png':
+        contentType = 'image/png';
     }
 
     return this.s3

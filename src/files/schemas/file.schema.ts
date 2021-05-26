@@ -17,6 +17,9 @@ export class File {
   @Prop({ type: String, required: true })
   filename: string;
 
+  @Prop({ type: [String] })
+  childs?: string[];
+
   @Prop({ type: Date, default: Date.now })
   updated?: Date;
 }

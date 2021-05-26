@@ -27,8 +27,7 @@ export class FilesRepository {
   }
 
   async create(file: File): Promise<File> {
-    const newFile = file;
-    return this.fileModel.create(newFile);
+    return this.fileModel.create(file);
   }
 
   async findOneAndUpdate(
@@ -39,6 +38,6 @@ export class FilesRepository {
   }
 
   async delete(fileFilterQuery: FilterQuery<File>) {
-    return this.fileModel.deleteOne(fileFilterQuery);
+    return this.fileModel.deleteMany(fileFilterQuery);
   }
 }
