@@ -1,6 +1,9 @@
 {
   "name": "pearl-portfolio-server",
   "version": "0.0.1",
+  "engines": {
+    "node": "14.15.4"
+  },
   "description": "",
   "author": "",
   "private": true,
