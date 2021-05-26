@@ -161,6 +161,56 @@
         "signature": "d2f31f19e1ba6ed59be9259d660a239d9a3fcbbc8e038c6b2009bde34b175fed",
         "affectsGlobalScope": false
       },
+      "../node_modules/@types/estree/index.d.ts": {
+        "version": "f1e8ecd1d960d12e57316fd2889b0a57635f38f8c4c976d8deafa29650bbf320",
+        "signature": "f1e8ecd1d960d12e57316fd2889b0a57635f38f8c4c976d8deafa29650bbf320",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/@types/json-schema/index.d.ts": {
+        "version": "3a1e165b22a1cb8df82c44c9a09502fd2b33f160cd277de2cd3a055d8e5c6b27",
+        "signature": "3a1e165b22a1cb8df82c44c9a09502fd2b33f160cd277de2cd3a055d8e5c6b27",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/ajv/lib/ajv.d.ts": {
+        "version": "67f129ed8b372622ff36b8b10e39d03e09e363a5ff7821105f92f085b8d1ccba",
+        "signature": "67f129ed8b372622ff36b8b10e39d03e09e363a5ff7821105f92f085b8d1ccba",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts": {
+        "version": "327f42ab31ff4539ba868d0374f8825af328b104b5f78d26b2e3ce9cc17b43a0",
+        "signature": "327f42ab31ff4539ba868d0374f8825af328b104b5f78d26b2e3ce9cc17b43a0",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts": {
+        "version": "62a05210201c793349ec28254f06a01814c5b4f5591f6d1921941286db78ea2a",
+        "signature": "62a05210201c793349ec28254f06a01814c5b4f5591f6d1921941286db78ea2a",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/webpack/node_modules/schema-utils/declarations/index.d.ts": {
+        "version": "8f877178233f74095130e129ce86128a6a15afcfc6171d714e154863b6a65fe8",
+        "signature": "8f877178233f74095130e129ce86128a6a15afcfc6171d714e154863b6a65fe8",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/webpack/node_modules/tapable/tapable.d.ts": {
+        "version": "b395ec0779c66de885f97974534e95ee2c8bbf9acaf5857a6782ddc32972b6d8",
+        "signature": "b395ec0779c66de885f97974534e95ee2c8bbf9acaf5857a6782ddc32972b6d8",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/webpack/types.d.ts": {
+        "version": "a9d06f7a08ac71a542888db2c5a23956c2524a934d8637a5943465b3854c5ef5",
+        "signature": "a9d06f7a08ac71a542888db2c5a23956c2524a934d8637a5943465b3854c5ef5",
+        "affectsGlobalScope": false
+      },
+      "../node_modules/run-script-webpack-plugin/dist/index.d.ts": {
+        "version": "735d19ae41bbcd78b654d84c5bbd2474472cc20b5299aaeabb0b096cdd05a59d",
+        "signature": "735d19ae41bbcd78b654d84c5bbd2474472cc20b5299aaeabb0b096cdd05a59d",
+        "affectsGlobalScope": false
+      },
+      "../webpack-hmr.config.js": {
+        "version": "fbbcc7f9aa2823f3ac3d5f6e2b0c663815a90e83839e2d379fe5a1085a41ce5c",
+        "signature": "7133a16b2bcab23ed655f2733bb6da2dbf02970acb2534f0c3f7b9b8fed5aa90",
+        "affectsGlobalScope": true
+      },
       "../node_modules/reflect-metadata/index.d.ts": {
         "version": "8d6d51a5118d000ed3bfe6e1dd1335bebfff3fef23cd2af2f84a24d30f90cc90",
         "signature": "8d6d51a5118d000ed3bfe6e1dd1335bebfff3fef23cd2af2f84a24d30f90cc90",
@@ -4316,16 +4366,6 @@
         "signature": "0133ebdd17a823ae56861948870cde4dac18dd8818ab641039c85bbb720429e0",
         "affectsGlobalScope": false
       },
-      "../node_modules/@types/json-schema/index.d.ts": {
-        "version": "3a1e165b22a1cb8df82c44c9a09502fd2b33f160cd277de2cd3a055d8e5c6b27",
-        "signature": "3a1e165b22a1cb8df82c44c9a09502fd2b33f160cd277de2cd3a055d8e5c6b27",
-        "affectsGlobalScope": false
-      },
-      "../node_modules/@types/estree/index.d.ts": {
-        "version": "f1e8ecd1d960d12e57316fd2889b0a57635f38f8c4c976d8deafa29650bbf320",
-        "signature": "f1e8ecd1d960d12e57316fd2889b0a57635f38f8c4c976d8deafa29650bbf320",
-        "affectsGlobalScope": false
-      },
       "../node_modules/@types/eslint/index.d.ts": {
         "version": "7f4366cd82a5391c7a1a196908c624c9415f731a57400ea1c3661041cab398a8",
         "signature": "7f4366cd82a5391c7a1a196908c624c9415f731a57400ea1c3661041cab398a8",
@@ -4463,6 +4503,7 @@
       "removeComments": true,
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
+      "allowJs": true,
       "allowSyntheticDefaultImports": true,
       "target": 4,
       "sourceMap": true,
@@ -6698,6 +6739,11 @@
         "../node_modules/@types/yargs-parser/index.d.ts",
         "../node_modules/mongoose/index.d.ts"
       ],
+      "../node_modules/ajv/lib/ajv.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts"
+      ],
       "../node_modules/aws-sdk/clients/accessanalyzer.d.ts": [
         "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
         "../node_modules/@types/mongoose/index.d.ts",
@@ -11008,6 +11054,12 @@
         "../node_modules/@types/mongoose/index.d.ts",
         "../node_modules/mongoose/index.d.ts"
       ],
+      "../node_modules/run-script-webpack-plugin/dist/index.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/types.d.ts"
+      ],
       "../node_modules/rxjs/index.d.ts": [
         "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
         "../node_modules/@types/mongoose/index.d.ts",
@@ -11675,6 +11727,43 @@
         "../node_modules/@types/mongoose/index.d.ts",
         "../node_modules/mongoose/index.d.ts"
       ],
+      "../node_modules/webpack/node_modules/schema-utils/declarations/index.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts": [
+        "../node_modules/@types/json-schema/index.d.ts",
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/ajv/lib/ajv.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts": [
+        "../node_modules/@types/json-schema/index.d.ts",
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/ajv/lib/ajv.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/tapable/tapable.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts"
+      ],
+      "../node_modules/webpack/types.d.ts": [
+        "../node_modules/@types/estree/index.d.ts",
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts",
+        "../node_modules/webpack/node_modules/tapable/tapable.d.ts"
+      ],
       "../src/app.controller.ts": [
         "../node_modules/@nestjs/common/index.d.ts",
         "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
@@ -11853,6 +11942,12 @@
         "../src/utils/converter/converter.ts",
         "../src/utils/pdf2png/pdf2pngconverter.ts",
         "../src/utils/ppt2pdf/ppt2pdfconverter.ts"
+      ],
+      "../webpack-hmr.config.js": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/run-script-webpack-plugin/dist/index.d.ts"
       ]
     },
     "exportedModulesMap": {
@@ -14081,6 +14176,11 @@
         "../node_modules/@types/yargs-parser/index.d.ts",
         "../node_modules/mongoose/index.d.ts"
       ],
+      "../node_modules/ajv/lib/ajv.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts"
+      ],
       "../node_modules/aws-sdk/clients/accessanalyzer.d.ts": [
         "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
         "../node_modules/@types/mongoose/index.d.ts",
@@ -18391,6 +18491,12 @@
         "../node_modules/@types/mongoose/index.d.ts",
         "../node_modules/mongoose/index.d.ts"
       ],
+      "../node_modules/run-script-webpack-plugin/dist/index.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/types.d.ts"
+      ],
       "../node_modules/rxjs/index.d.ts": [
         "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
         "../node_modules/@types/mongoose/index.d.ts",
@@ -19057,6 +19163,43 @@
         "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
         "../node_modules/@types/mongoose/index.d.ts",
         "../node_modules/mongoose/index.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/schema-utils/declarations/index.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts": [
+        "../node_modules/@types/json-schema/index.d.ts",
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/ajv/lib/ajv.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/schema-utils/declarations/validationerror.d.ts": [
+        "../node_modules/@types/json-schema/index.d.ts",
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/ajv/lib/ajv.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts"
+      ],
+      "../node_modules/webpack/node_modules/tapable/tapable.d.ts": [
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts"
+      ],
+      "../node_modules/webpack/types.d.ts": [
+        "../node_modules/@types/estree/index.d.ts",
+        "../node_modules/@types/mongoose-paginate-v2/index.d.ts",
+        "../node_modules/@types/mongoose/index.d.ts",
+        "../node_modules/mongoose/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/index.d.ts",
+        "../node_modules/webpack/node_modules/schema-utils/declarations/validate.d.ts",
+        "../node_modules/webpack/node_modules/tapable/tapable.d.ts"
       ],
       "../src/app.controller.ts": [
         "../src/app.service.ts"

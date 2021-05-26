@@ -49,6 +49,7 @@ describe('FilesController', () => {
               file_type: info.file_type,
               filename: info.filename,
               updated: info.updated,
+              childs: [],
               url: 'https://s3.amazonaws.com/',
             };
             return res;

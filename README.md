@@ -66,4 +66,20 @@ https://github.com/DuckyTeam/heroku-buildpack-imagemagick
 https://github.com/BlueTeaLondon/heroku-buildpack-libreoffice-for-heroku-18.git
 https://github.com/survantjames/heroku-buildpack-poppler.git
 
+
+```
+
+# Aptfile
+
+```bash
+
+libsm6
+libice6
+libxinerama1
+libdbus-glib-1-2
+libharfbuzz0b
+libharfbuzz-icu0
+libx11-xcb1
+libxcb1
+
 ```
