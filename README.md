@@ -60,6 +60,7 @@ $ npm run test:cov
 
 ```bash
 
+# need to add to heroku buildpack if file convert is needed
 https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku-community/apt.tgz
 https://github.com/DuckyTeam/heroku-buildpack-imagemagick
 https://github.com/BlueTeaLondon/heroku-buildpack-libreoffice-for-heroku-18.git
