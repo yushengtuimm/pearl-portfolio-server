@@ -1,4 +1,5 @@
+.circleci
 src
-public
+test
 README.md
 node_modules
