@@ -7,10 +7,10 @@ import {
 import { S3ManagerService } from '../s3-manager/s3-manager.service';
 import { File } from './schemas/file.schema';
 import { FilesRepository } from './files.repository';
-import { FunctionResult } from '../../utils/functionResult';
+import { FunctionResult } from '../utils/functionResult';
 import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
 import { FileWithUrlDto, fileDTO, paginateResult } from './dto/fileWithUrl.dto';
-import Ppt2PngConverter from '../../utils/FileConverter/ppt2png';
+import Ppt2PngConverter from '../utils/ppt2png/Ppt2PngConverter';
 import { join, extname } from 'path';
 import {
   writeFileSync,
@@ -61,7 +61,7 @@ export class FilesService {
 
           // convert ppt to pdf -> pdf to png
           const converter = Ppt2PngConverter.create({
-            files: [tempFilePath],
+            file: tempFilePath,
             output: dir + '/',
           });
           converter.convert();

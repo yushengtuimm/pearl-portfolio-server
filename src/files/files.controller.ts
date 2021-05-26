@@ -16,7 +16,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { Response } from 'express';
 import { File } from './schemas/file.schema';
-import { FunctionResult } from '../../utils/functionResult';
+import { FunctionResult } from '../utils/functionResult';
 import { PaginateResult } from 'mongoose';
 import { FileWithUrlDto } from './dto/fileWithUrl.dto';
 

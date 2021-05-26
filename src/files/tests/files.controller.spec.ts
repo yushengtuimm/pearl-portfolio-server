@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FunctionResult } from 'src/utils/functionResult';
+import { FunctionResult } from '../../utils/functionResult';
 import { FileWithUrlDto } from '../dto/fileWithUrl.dto';
 import { FilesController } from '../files.controller';
 import { FilesService } from '../files.service';
