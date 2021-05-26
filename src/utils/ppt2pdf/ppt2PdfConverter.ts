@@ -22,8 +22,8 @@ class Ppt2PdfConverter extends Converter {
   }
 
   get converterForLinux() {
-    return 'libreoffice --headless --convert-to pdf --outdir';
-  }
+    return 'soffice --headless --convert-to pdf --outdir';
+  } //libreoffice
 
   get converterForMac() {
     const sOfficeMac = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
