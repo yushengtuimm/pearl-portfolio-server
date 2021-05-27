@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
+import {
+  FilterQuery,
+  UpdateQuery,
+  PaginateOptions,
+  PaginateResult,
+} from 'mongoose';
 import { File, FileDocument, FileModel } from './schemas/file.schema';
 
 @Injectable()
@@ -28,6 +33,13 @@ export class FilesRepository {
 
   async create(file: File): Promise<File> {
     return this.fileModel.create(file);
+  }
+
+  async update(
+    fileFilterQuery: FilterQuery<File>,
+    updateQuery: UpdateQuery<File>,
+  ) {
+    return this.fileModel.updateOne(fileFilterQuery, updateQuery);
   }
 
   async findOneAndUpdate(

@@ -51,63 +51,71 @@ export class FilesService {
           extention,
         );
 
-        const childs = [];
-        if (extention == 'pptx' || extention == 'ppt') {
-          // genereate temp file for file converter to process
-          const dir = join(__dirname, 'public');
-          if (!existsSync(dir)) mkdirSync(dir);
-          const tempFilePath = join(dir + '/' + filename);
-          writeFileSync(tempFilePath, buffer);
-
-          // convert ppt to pdf -> pdf to png
-          const converter = Ppt2PngConverter.create({
-            file: tempFilePath,
-            output: dir + '/',
-          });
-          converter.convert();
-
-          // read in all png files and upload to s3
-          const tempFiles = readdirSync(dir);
-          const pngFiles = tempFiles.filter((file) => extname(file) === '.png');
-          for (const pngName of pngFiles) {
-            const pngFile = join(dir, pngName);
-            const pngBuffer = readFileSync(pngFile);
-            const pngUploadResult = await this.s3Manager.uploadFileToBucket(
-              pngBuffer,
-              'png',
-            );
-
-            // push new file id to childs of parent file
-            const pngFileInfo = await this.filesRepository.create({
-              fileId: pngUploadResult.Key,
-              filename: pngName,
-              file_type: 'png',
-            });
-            childs.push(pngFileInfo.fileId);
-          }
-
-          // remove all temporary files
-          tempFiles.forEach((item) => {
-            unlink(join(dir, item), (err) => {
-              if (err) {
-                return;
-              }
-            });
-          });
-        }
-
         const fileInfo = await this.filesRepository.create({
           fileId: uploadResult.Key,
           filename: filename,
           file_type: extention,
-          childs: childs,
         });
+
+        if (extention == 'pptx' || extention == 'ppt') {
+          this.processPPT(filename, buffer, fileInfo.fileId);
+        }
 
         return {
           success: true,
           result_object: fileInfo,
         };
       }),
+    );
+  }
+
+  async processPPT(filename: string, buffer: Buffer, parentId: string) {
+    // genereate temp file in root/public dir
+    // this temp file will be use for file converter to process
+    const dir = join(__dirname, 'public');
+    if (!existsSync(dir)) {
+      mkdirSync(dir);
+    }
+    const tempFilePath = join(dir + '/' + filename);
+    writeFileSync(tempFilePath, buffer);
+
+    // convert ppt to pdf -> pdf to png
+    const converter = Ppt2PngConverter.create({
+      file: tempFilePath,
+      output: dir + '/',
+    });
+    converter.convert();
+
+    // read in all png files and upload to s3
+    const tempFiles = readdirSync(dir);
+    const pngFiles = tempFiles.filter((file) => extname(file) === '.png');
+    for (const pngName of pngFiles) {
+      this.uploadFilesAsync(dir, pngName, parentId);
+    }
+
+    // remove all temporary files
+    tempFiles.forEach((item) => {
+      unlink(join(dir, item), (err) => {
+        if (err) {
+          return;
+        }
+      });
+    });
+  }
+
+  async uploadFilesAsync(dir: string, filename: string, parentId: string) {
+    const buffer = readFileSync(join(dir, filename));
+    const uploadResult = await this.s3Manager.uploadFileToBucket(buffer, 'png');
+
+    // push new file id to childs of parent file
+    const fileInfo = await this.filesRepository.create({
+      fileId: uploadResult.Key,
+      filename: filename,
+      file_type: 'png',
+    });
+    const updateRes = await this.filesRepository.update(
+      { fileId: parentId },
+      { $push: { childs: fileInfo.fileId } },
     );
   }
 
