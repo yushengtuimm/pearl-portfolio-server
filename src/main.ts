@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { AppClusterService } from './app-cluster.service';
 
 declare const module: any;
 async function bootstrap() {
@@ -16,4 +17,6 @@ async function bootstrap() {
     module.hot.dispose(() => app.close());
   }
 }
+
+AppClusterService.clusterize(bootstrap);
 bootstrap();
