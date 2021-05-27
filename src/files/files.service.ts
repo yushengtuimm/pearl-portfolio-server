@@ -149,6 +149,7 @@ export class FilesService {
   }
 
   async findFile(filename: string): Promise<FileWithUrlDto | FileWithUrlDto[]> {
+    console.log(filename);
     const doc = await this.filesRepository.findOne({ filename });
     if (doc) {
       if (doc.childs) {
@@ -165,7 +166,7 @@ export class FilesService {
       }
     }
     throw new NotFoundException(
-      `cannot find file with name [${doc.filename}] in cloud storage.`,
+      `cannot find file with name [${filename}] in cloud storage.`,
     );
   }
 
