@@ -36,6 +36,7 @@
     "aws-sdk": "^2.909.0",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
+    "convertapi": "^1.11.1",
     "mongoose": "^5.12.10",
     "mongoose-paginate-v2": "^1.3.18",
     "nest-aws-sdk": "^1.1.1",

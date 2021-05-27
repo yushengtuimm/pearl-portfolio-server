@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { FilesService } from './files.service';
@@ -20,10 +21,8 @@ import { join } from 'path';
         },
       },
     ]),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', 'client'),
-    // }),
     S3ManagerModule,
+    ConfigModule,
   ],
   controllers: [FilesController],
   providers: [FilesService, FilesRepository],
