@@ -60,7 +60,7 @@ $ npm run test:cov
 
 ```bash
 
-# need to add to heroku buildpack if file convert is needed
+# need to add to heroku buildpack if file conversion is needed
 https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku-community/apt.tgz
 https://github.com/DuckyTeam/heroku-buildpack-imagemagick
 https://github.com/BlueTeaLondon/heroku-buildpack-libreoffice-for-heroku-18.git
@@ -69,10 +69,11 @@ https://github.com/survantjames/heroku-buildpack-poppler.git
 
 ```
 
-# Aptfile
+### Aptfile
 
 ```bash
 
+# this file will be required to create when using libreoffice
 libsm6
 libice6
 libxinerama1
