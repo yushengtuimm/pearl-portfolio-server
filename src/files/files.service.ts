@@ -175,7 +175,7 @@ export class FilesService {
   async findFile(filename: string): Promise<FileWithUrlDto | FileWithUrlDto[]> {
     const doc = await this.filesRepository.findOne({ filename });
     if (doc) {
-      if (doc.childs) {
+      if (doc.childs && doc.childs.length > 0) {
         const res: FileWithUrlDto[] = [];
         for (const child of doc.childs) {
           const info = await this.filesRepository.findOne({ fileId: child });
